@@ -1079,7 +1079,7 @@
       </div>
 
       <div class="controls">
-        <button id="musicBtn">♫ Ativar música</button>
+        <button id="musicBtn">🔊 Desligar música</button>
         <button class="secondary" id="backBtn">↩ Voltar ao envelope</button>
       </div>
     </article>
@@ -1265,63 +1265,49 @@
       }
     });
 
-    // Audio Engine Web Audio API
-    let audioCtx, master, timer, playing = false;
-    const notes = [261.63, 329.63, 392.00, 493.88, 392.00, 329.63];
-
-    function tone(freq, start, duration, volume = .018) {
-      if (!audioCtx || audioCtx.state === 'closed') return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        const safeStart = Math.max(start, audioCtx.currentTime + 0.01);
-        gain.gain.setValueAtTime(0.0001, safeStart);
-        gain.gain.exponentialRampToValueAtTime(volume, safeStart + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.0001, safeStart + duration);
-        osc.connect(gain).connect(master);
-        osc.start(safeStart);
-        osc.stop(safeStart + duration + .05);
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    // Background Music Player (MP3)
+    const bgMusic = new Audio('keep-your-focus-on-me_KZt3uJ15.mp3');
+    bgMusic.loop = true;
+    let playing = false;
 
     function startMusic() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        master = audioCtx.createGain();
-        master.gain.value = .65;
-        master.connect(audioCtx.destination);
-      }
-      if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-
-      if (!timer) {
-        let i = 0;
-        timer = setInterval(() => {
-          if (!playing || !audioCtx) return;
-          const now = audioCtx.currentTime;
-          tone(notes[i % notes.length], now + 0.05, 2.8, .014);
-          tone(notes[(i + 2) % notes.length] / 2, now + 0.05, 3.4, .008);
-          i++;
-        }, 1700);
-      }
-      playing = true;
-      musicBtn.textContent = '♫ Pausar música';
-      musicBtn.classList.add('playing');
+      bgMusic.play().then(() => {
+        playing = true;
+        musicBtn.textContent = '🔊 Desligar música';
+        musicBtn.classList.add('playing');
+      }).catch(err => {
+        console.log("Autoplay aguardando interação:", err);
+      });
     }
 
     function pauseMusic() {
+      bgMusic.pause();
       playing = false;
-      if (audioCtx && audioCtx.state === 'running') { audioCtx.suspend(); }
-      musicBtn.textContent = '♫ Ativar música';
+      musicBtn.textContent = '♫ Ligar música';
       musicBtn.classList.remove('playing');
     }
 
     musicBtn.addEventListener('click', () => {
-      if (playing) pauseMusic(); else startMusic();
+      if (playing && !bgMusic.paused) {
+        pauseMusic();
+      } else {
+        startMusic();
+      }
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      startMusic();
+    });
+
+    function enableAudioOnFirstTouch() {
+      if (!playing || bgMusic.paused) {
+        startMusic();
+      }
+      document.removeEventListener('click', enableAudioOnFirstTouch);
+      document.removeEventListener('touchstart', enableAudioOnFirstTouch);
+    }
+    document.addEventListener('click', enableAudioOnFirstTouch);
+    document.addEventListener('touchstart', enableAudioOnFirstTouch);
 
     // Roteamento SPA Admin
     function handleRouting() {
