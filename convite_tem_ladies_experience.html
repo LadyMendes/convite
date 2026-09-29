@@ -1315,22 +1315,27 @@
       const hash = window.location.hash;
       const search = window.location.search;
 
-      if (path.includes('/admin') || hash === '#admin' || search.includes('admin')) {
-        const pass = prompt('🔒 Acesso Restrito: Digite a senha de administrador:');
-        if (pass !== ADMIN_PASS) {
-          if (pass !== null) alert('Senha incorreta.');
-          if (window.location.hash === '#admin') window.location.hash = '';
-          if (window.location.pathname.includes('/admin')) {
-            history.replaceState(null, '', window.location.pathname.replace(/\/admin\/?$/, '/'));
+      if (path.includes('/admin') || hash.includes('admin') || search.includes('admin')) {
+        setTimeout(() => {
+          const pass = prompt('🔒 Acesso Restrito: Digite a senha de administrador:');
+          if (pass !== ADMIN_PASS) {
+            if (pass !== null) alert('Senha incorreta.');
+            if (window.location.hash.includes('admin')) window.location.hash = '';
+            if (window.location.search.includes('admin')) {
+              history.replaceState(null, '', window.location.pathname);
+            }
+            if (window.location.pathname.includes('/admin')) {
+              history.replaceState(null, '', window.location.pathname.replace(/\/admin\/?$/, '/'));
+            }
+            document.getElementById('adminView').classList.remove('show');
+            envelopeWrap.style.display = 'block';
+            return;
           }
-          document.getElementById('adminView').classList.remove('show');
-          envelopeWrap.style.display = 'block';
-          return;
-        }
-        envelopeWrap.style.display = 'none';
-        letter.style.display = 'none';
-        document.getElementById('adminView').classList.add('show');
-        renderAdminDashboard();
+          envelopeWrap.style.display = 'none';
+          letter.style.display = 'none';
+          document.getElementById('adminView').classList.add('show');
+          renderAdminDashboard();
+        }, 150);
       } else {
         document.getElementById('adminView').classList.remove('show');
       }
@@ -1340,7 +1345,10 @@
     document.addEventListener('DOMContentLoaded', handleRouting);
 
     function navigateHome() {
-      if (window.location.hash === '#admin') window.location.hash = '';
+      if (window.location.hash.includes('admin')) window.location.hash = '';
+      if (window.location.search.includes('admin')) {
+        history.replaceState(null, '', window.location.pathname);
+      }
       if (window.location.pathname.includes('/admin')) {
         history.replaceState(null, '', window.location.pathname.replace(/\/admin\/?$/, '/'));
       }

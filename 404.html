@@ -6,9 +6,9 @@
   <script>
     if (window.location.pathname.includes('/admin')) {
       var base = window.location.pathname.replace(/\/admin\/?$/, '');
-      window.location.replace(base + '/#admin');
+      window.location.href = (base || '') + '/?admin';
     } else {
-      window.location.replace('/convite/');
+      window.location.href = '/convite/';
     }
   </script>
 </head>
