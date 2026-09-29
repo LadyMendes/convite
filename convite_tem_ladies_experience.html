@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uma carta para você — Tem Ladies Experience</title>
+  <link rel="icon" type="image/png" href="Adesivo1.png">
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --purple: #32143f;
+      --purple2: #4b2359;
+      --orange: #c96832;
+      --cream: #f7efe3;
+      --paper: #fffaf2;
+      --gold: #b8874a;
+      --ink: #39263d;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(201, 104, 50, .13), transparent 25%),
+        radial-gradient(circle at 80% 80%, rgba(75, 35, 89, .16), transparent 30%),
+        var(--purple);
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .scene {
+      width: min(100%, 900px);
+      min-height: 100vh;
+      padding: 28px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      perspective: 1400px;
+    }
+
+    .envelope-wrap {
+      width: min(92vw, 520px);
+      perspective: 1200px;
+      text-align: center;
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .brand {
+      color: #f7efe3;
+      letter-spacing: .18em;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .envelope {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1.55;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      filter: drop-shadow(0 24px 35px rgba(0, 0, 0, .32));
+      outline: none;
+    }
+
+    .envelope:focus-visible {
+      box-shadow: 0 0 0 3px var(--orange);
+      border-radius: 8px;
+    }
+
+    .env-back {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--purple2), var(--purple));
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .env-back:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(45deg, transparent 49%, rgba(201, 104, 50, .45) 50%, transparent 51%),
+        linear-gradient(-45deg, transparent 49%, rgba(201, 104, 50, .25) 50%, transparent 51%);
+      opacity: .45;
+    }
+
+    .letter-preview {
+      position: absolute;
+      left: 9%;
+      right: 9%;
+      bottom: 5%;
+      height: 86%;
+      background: var(--paper);
+      border-radius: 4px 4px 0 0;
+      transform: translateY(16%);
+      transition: transform .9s ease;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, .12);
+    }
+
+    .letter-preview:before {
+      content: "UMA CARTA PARA VOCÊ";
+      position: absolute;
+      top: 55%;
+      left: 4%;
+      right: 4%;
+      text-align: center;
+      font-size: clamp(15px, 3.6vw, 22px);
+      font-style: italic;
+      font-weight: 600;
+      color: var(--purple);
+    }
+
+    .flap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 57%;
+      background: linear-gradient(135deg, #5a2a68, #32143f);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transition: transform .9s ease;
+      z-index: 4;
+    }
+
+    .seal {
+      position: absolute;
+      z-index: 6;
+      left: 50%;
+      top: 53%;
+      transform: translate(-50%, -50%);
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: #ffffff;
+      padding: 4px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .35), inset 0 0 0 2px var(--gold);
+      transition: opacity .4s ease, transform .8s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .seal-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .open-hint {
+      color: #ffffff;
+      margin-top: 24px;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: .05em;
+      background: rgba(255, 255, 255, 0.14);
+      display: inline-block;
+      padding: 8px 22px;
+      border-radius: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      animation: pulse 2.2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.78;
+        transform: scale(0.98);
+      }
+    }
+
+    .envelope-wrap.open .flap {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-wrap.open .letter-preview {
+      transform: translateY(-8%);
+    }
+
+    .envelope-wrap.open .seal {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(.6);
+    }
+
+    .envelope-wrap.open .open-hint {
+      opacity: 0;
+    }
+
+    /* Carta com efeito 3D de desdobrar */
+    .letter {
+      display: none;
+      width: min(94vw, 720px);
+      max-height: 92vh;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(201, 104, 50, .09), transparent 20%),
+        var(--paper);
+      padding: 52px clamp(24px, 7vw, 72px) 58px;
+      border: 1px solid rgba(184, 135, 74, .35);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, .35);
+      position: relative;
+      transform-origin: top center;
+      transform-style: preserve-3d;
+    }
+
+    .letter.show {
+      display: block;
+      animation: unfoldLetter 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes unfoldLetter {
+      0% {
+        opacity: 0;
+        transform: scaleY(0.15) rotateX(-85deg) translateY(-100px);
+        filter: brightness(0.8);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
+      }
+
+      45% {
+        opacity: 0.9;
+        transform: scaleY(0.7) rotateX(25deg) translateY(12px);
+        filter: brightness(0.95);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+      }
+
+      75% {
+        transform: scaleY(1.02) rotateX(-8deg) translateY(0);
+        filter: brightness(1);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scaleY(1) rotateX(0deg) translateY(0);
+        filter: brightness(1);
+        box-shadow: 0 30px 70px rgba(0, 0, 0, .35);
+      }
+    }
+
+    .paper-crease {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184, 135, 74, .25) 20%, rgba(184, 135, 74, .25) 80%, transparent);
+      pointer-events: none;
+    }
+
+    .paper-crease.crease-1 {
+      top: 33%;
+    }
+
+    .paper-crease.crease-2 {
+      top: 66%;
+    }
+
+    .letter:before,
+    .letter:after {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border: 3px solid var(--orange);
+      opacity: .55;
+    }
+
+    .letter:before {
+      left: -2px;
+      top: -2px;
+      border-right: 0;
+      border-bottom: 0;
+    }
+
+    .letter:after {
+      right: -2px;
+      bottom: -2px;
+      border-left: 0;
+      border-top: 0;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .letter-logo-img {
+      max-width: 130px;
+      height: auto;
+      margin: 0 auto 8px;
+      display: block;
+      filter: drop-shadow(0 2px 5px rgba(50, 20, 63, 0.12));
+    }
+
+    .logo-subtext {
+      color: var(--purple);
+      letter-spacing: .15em;
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 14px 0 5px;
+      text-align: center;
+      color: var(--purple);
+      font-size: clamp(28px, 7vw, 48px);
+      font-weight: normal;
+      font-style: italic;
+    }
+
+    .edition {
+      text-align: center;
+      color: var(--purple);
+      letter-spacing: .16em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .theme {
+      text-align: center;
+      color: var(--orange);
+      font-size: clamp(18px, 4vw, 25px);
+      font-style: italic;
+      margin: 20px 0 30px;
+    }
+
+    .bodycopy {
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .bodycopy p {
+      margin: 0 0 17px
+    }
+
+    .highlight {
+      text-align: center;
+      color: var(--orange);
+      font-size: 20px;
+      line-height: 1.55;
+      font-style: italic;
+      margin: 28px 0;
+    }
+
+    .question {
+      text-align: center;
+      color: var(--purple);
+      font-size: 20px;
+      font-style: italic;
+      margin: 28px auto;
+      max-width: 560px;
+    }
+
+    .details {
+      margin-top: 34px;
+      padding: 20px;
+      border-top: 1px solid rgba(184, 135, 74, .5);
+      border-bottom: 1px solid rgba(184, 135, 74, .5);
+      text-align: center;
+      color: var(--purple);
+      line-height: 1.8;
+    }
+
+    .details strong {
+      letter-spacing: .08em
+    }
+
+    /* RSVP Section */
+    .rsvp-section {
+      margin-top: 36px;
+      padding: 28px 22px;
+      background: rgba(247, 239, 227, 0.65);
+      border: 1px dashed var(--gold);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .rsvp-divider {
+      color: var(--gold);
+      margin-bottom: 6px;
+      letter-spacing: 4px;
+      font-size: 14px;
+    }
+
+    .rsvp-title {
+      font-size: 24px;
+      color: var(--purple);
+      font-style: italic;
+      margin: 0 0 8px;
+      font-weight: normal;
+    }
+
+    .rsvp-desc {
+      font-size: 14px;
+      color: var(--ink);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .rsvp-form {
+      text-align: left;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--purple);
+      margin-bottom: 6px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="tel"],
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(184, 135, 74, 0.4);
+      border-radius: 8px;
+      background: #ffffff;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(201, 104, 50, 0.15);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .radio-card {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .radio-card input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .radio-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 2px solid rgba(184, 135, 74, 0.3);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--purple);
+      transition: all .2s ease;
+    }
+
+    .radio-card input:checked+.radio-content {
+      border-color: var(--orange);
+      background: rgba(201, 104, 50, 0.08);
+      color: var(--orange);
+    }
+
+    .rsvp-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all .25s ease;
+      box-shadow: 0 4px 14px rgba(201, 104, 50, 0.3);
+      margin-top: 8px;
+    }
+
+    .rsvp-btn:hover {
+      background: #b55724;
+      transform: translateY(-2px);
+    }
+
+    .rsvp-success {
+      text-align: center;
+      padding: 20px 10px;
+    }
+
+    .success-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .rsvp-success h4 {
+      color: var(--purple);
+      font-size: 22px;
+      margin: 0 0 8px;
+      font-style: italic;
+    }
+
+    .rsvp-success p {
+      font-size: 15px;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .signature {
+      margin-top: 30px;
+      text-align: left;
+      font-size: 17px;
+      font-style: italic;
+    }
+
+    .sig-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 7px;
+    }
+
+    .signature b {
+      display: block;
+      font-size: 22px;
+      color: var(--purple);
+    }
+
+    .sig-stamp {
+      width: 68px;
+      height: auto;
+      opacity: .9;
+    }
+
+    .closing {
+      margin-top: 32px;
+      text-align: center;
+      color: var(--orange);
+      font-size: 19px;
+      font-style: italic;
+      line-height: 1.55;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid rgba(184, 135, 74, .6);
+      background: var(--purple);
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all .25s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    }
+
+    button:hover {
+      background: var(--purple2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--purple);
+      border-color: var(--purple);
+    }
+
+    button.secondary:hover {
+      background: rgba(75, 35, 89, .08);
+    }
+
+    button.playing {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .footer-admin-link {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .footer-admin-link a {
+      color: var(--purple);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #e2b873;
+      opacity: .7;
+      animation: float 5s infinite ease-in-out;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+        opacity: .25
+      }
+
+      50% {
+        transform: translateY(-18px);
+        opacity: .8
+      }
+    }
+
+    /* Admin View */
+    .admin-view {
+      display: none;
+      width: min(96vw, 980px);
+      min-height: 85vh;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 100;
+      color: var(--ink);
+      margin: 20px auto;
+    }
+
+    .admin-view.show {
+      display: block;
+      animation: fadeIn .4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--cream);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .admin-header h2 {
+      margin: 0;
+      color: var(--purple);
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-style: italic;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--paper);
+      border: 1px solid rgba(184, 135, 74, 0.3);
+      padding: 18px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .kpi-card .num {
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--purple);
+    }
+
+    .kpi-card .label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .kpi-card.success .num {
+      color: #2e7d32;
+    }
+
+    .kpi-card.decline .num {
+      color: #7b1fa2;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 260px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--purple);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-admin {
+      padding: 9px 16px;
+      border-radius: 6px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-excel {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .btn-excel:hover {
+      background: #1b5e20;
+    }
+
+    .btn-add {
+      background: var(--purple);
+      color: white;
+    }
+
+    .btn-add:hover {
+      background: var(--purple2);
+    }
+
+    .btn-config {
+      background: #555;
+      color: white;
+    }
+
+    .btn-back-invitation {
+      background: transparent;
+      color: var(--purple);
+      border: 1px solid var(--purple);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .admin-table th {
+      background: var(--purple);
+      color: white;
+      padding: 12px 16px;
+      font-weight: 600;
+    }
+
+    .admin-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .admin-table tr:hover {
+      background: #faf8f5;
+    }
+
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .badge-status.yes {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-status.no {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #d32f2f;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* Modal Admin Config */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: min(92vw, 540px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-card h3 {
+      margin-top: 0;
+      color: var(--purple);
+    }
+
+    .modal-card code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      display: block;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scene">
+    <span class="sparkle" style="left:12%;top:18%"></span>
+    <span class="sparkle" style="left:86%;top:26%;animation-delay:1s"></span>
+    <span class="sparkle" style="left:18%;top:78%;animation-delay:2s"></span>
+    <span class="sparkle" style="left:80%;top:74%;animation-delay:3s"></span>
+
+    <!-- Envelope -->
+    <div class="envelope-wrap" id="envelopeWrap">
+      <div class="brand">Tem Ladies na Favela</div>
+
+      <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Abrir carta">
+        <div class="env-back"></div>
+        <div class="letter-preview"></div>
+        <div class="flap"></div>
+        <div class="seal">
+          <img src="Adesivo1.png" alt="Leidi Mendes" class="seal-img">
+        </div>
+      </div>
+
+      <div class="open-hint">Toque no envelope para abrir sua carta</div>
+    </div>
+
+    <!-- Carta -->
+    <article class="letter" id="letter">
+      <div class="paper-crease crease-1"></div>
+      <div class="paper-crease crease-2"></div>
+
+      <div class="logo">
+        <img src="Adesivo1.png" alt="Leidi Mendes" class="letter-logo-img">
+        <div class="logo-subtext">TEM LADIES NA FAVELA</div>
+      </div>
+
+      <h1>Uma carta para você</h1>
+      <div class="edition">TEM LADIES EXPERIENCE · 3ª EDIÇÃO</div>
+      <div class="theme">“Eu também preciso de mim.”</div>
+
+      <div class="bodycopy">
+        <p>Querida,</p>
+
+        <p>Existe uma mulher que está sempre cuidando.</p>
+
+        <p>Cuida da casa, dos filhos, do trabalho, dos sonhos, da família, dos outros…</p>
+
+        <p>Resolve, acolhe, aconselha, empreende, corre, entrega.</p>
+
+        <p>E, no meio de tudo isso, muitas vezes deixa para depois uma pessoa muito importante:</p>
+
+        <p><strong>ela mesma.</strong></p>
+
+        <p>Por isso, esta carta chegou até você.</p>
+
+        <p>Você foi convidada para viver uma tarde pensada especialmente para lembrar que <strong>você também merece
+            cuidado, beleza, presença, prazer e descanso.</strong></p>
+
+        <p>No dia <strong>17 de outubro</strong>, a gente vai desacelerar.</p>
+
+        <p>Vamos conversar, sentir, rir, trocar experiências, nos olhar com mais carinho e permitir que, por algumas
+          horas, o mundo espere.</p>
+
+        <div class="highlight">
+          Uma experiência íntima, afetiva e sensorial.
+        </div>
+
+        <p>Uma tarde para:</p>
+
+        <div class="highlight">
+          Se ver.<br>
+          Se escutar.<br>
+          Se acolher.<br>
+          Se permitir.<br>
+          E se escolher.
+        </div>
+
+        <p>Teremos uma experiência de imagem e estilo, uma conversa especial sobre o universo feminino, momentos de
+          conexão, uma mesa preparada com carinho, pequenos detalhes para despertar os sentidos e um mimo preparado
+          especialmente para você.</p>
+
+        <p>Tudo isso porque acreditamos que luxo também é <strong>sentir-se cuidada, ser lembrada e perceber que cada
+            detalhe daquele momento foi pensado especialmente para você.</strong></p>
+
+        <div class="question">
+          Quando foi a última vez que você fez algo simplesmente por você?
+        </div>
+
+        <p style="text-align:center">Talvez seja agora.</p>
+      </div>
+
+      <div class="details">
+        <strong>TEM LADIES EXPERIENCE</strong><br>
+        3ª edição<br><br>
+        📅 <strong>17 DE OUTUBRO DE 2026</strong><br>
+        🕓 <strong>A PARTIR DAS 16H</strong><br>
+        📍 Local informado no convite
+      </div>
+
+      <!-- Seção de RSVP (Confirmação de Presença) -->
+      <div class="rsvp-section" id="rsvpSection">
+        <div class="rsvp-divider">✦ ✦ ✦</div>
+        <h3 class="rsvp-title">Confirme sua Presença</h3>
+        <p class="rsvp-desc">Por ser um encontro intimista para poucas mulheres, sua confirmação é essencial para
+          organizarmos cada detalhe com carinho.</p>
+
+        <form id="rsvpForm" class="rsvp-form">
+          <div class="form-group">
+            <label for="guestName">Seu Nome Completo *</label>
+            <input type="text" id="guestName" required placeholder="Digite seu nome completo">
+          </div>
+
+          <div class="form-group">
+            <label for="guestPhone">WhatsApp / Telefone *</label>
+            <input type="tel" id="guestPhone" required placeholder="(11) 99999-9999">
+          </div>
+
+          <div class="form-group">
+            <label>Você comparecerá ao evento? *</label>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" name="attending" value="true" checked required>
+                <div class="radio-content">
+                  <span>✨ Sim, estarei lá!</span>
+                </div>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="attending" value="false" required>
+                <div class="radio-content">
+                  <span>💜 Infelizmente não posso</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="guestMessage">Recado especial para a Leidi (opcional)</label>
+            <textarea id="guestMessage" rows="2" placeholder="Escreva uma mensagem..."></textarea>
+          </div>
+
+          <button type="submit" id="submitRsvpBtn" class="rsvp-btn">Enviar Resposta</button>
+        </form>
+
+        <div id="rsvpSuccess" class="rsvp-success" style="display:none">
+          <div class="success-icon">✨</div>
+          <h4 id="successTitle">Resposta Registrada!</h4>
+          <p id="successMessage">Obrigada por responder. Cada detalhe está sendo preparado com muito carinho!</p>
+        </div>
+      </div>
+
+      <div class="closing">
+        Um encontro para poucas mulheres.<br>
+        Uma experiência para lembrar de uma mulher em especial:<br>
+        <strong>você.</strong>
+      </div>
+
+      <div class="signature">
+        Com carinho,
+        <div class="sig-flex">
+          <div>
+            <b>Leidi Mendes</b>
+            <span>Tem Ladies na Favela</span>
+          </div>
+          <img src="Adesivo1.png" alt="Leidi Mendes" class="sig-stamp">
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="musicBtn">♫ Ativar música</button>
+        <button class="secondary" id="backBtn">↩ Voltar ao envelope</button>
+      </div>
+
+      <div class="footer-admin-link">
+        <a id="adminLink" href="#admin">🔒 Painel Administrativo</a>
+      </div>
+    </article>
+
+    <!-- Painel de Administração (/admin) -->
+    <main class="admin-view" id="adminView">
+      <div class="admin-header">
+        <h2>♔ Painel de Confirmações — Tem Ladies</h2>
+        <div class="btn-group">
+          <button class="btn-admin btn-back-invitation" onclick="navigateHome()">↩ Ver Convite</button>
+          <button class="btn-admin btn-config" onclick="openConfigModal()">⚙️ Configurações Supabase</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="num" id="kpiTotal">0</div>
+          <div class="label">Total Respostas</div>
+        </div>
+        <div class="kpi-card success">
+          <div class="num" id="kpiYes">0</div>
+          <div class="label">Confirmadas (Sim)</div>
+        </div>
+        <div class="kpi-card decline">
+          <div class="num" id="kpiNo">0</div>
+          <div class="label">Ausentes (Não)</div>
+        </div>
+      </div>
+
+      <div class="admin-toolbar">
+        <input type="text" id="adminSearch" class="search-input" placeholder="🔍 Buscar por nome..."
+          oninput="filterAdminTable()">
+        <div class="btn-group">
+          <button class="btn-admin btn-excel" onclick="exportToCSV()">📥 Exportar CSV (Excel)</button>
+          <button class="btn-admin btn-add" onclick="promptAddGuest()">+ Adicionar Convidada</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nome da Convidada</th>
+              <th>WhatsApp / Tel</th>
+              <th>Presença</th>
+              <th>Mensagem</th>
+              <th>Data/Hora</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Renderizado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- Modal Configurações Supabase -->
+    <div class="modal-overlay" id="configModal">
+      <div class="modal-card">
+        <h3>⚙️ Configuração do Supabase</h3>
+        <p>Insira abaixo as credenciais do seu projeto Supabase para sincronização em nuvem real time:</p>
+
+        <div class="form-group">
+          <label>URL do Supabase</label>
+          <input type="text" id="supabaseUrlInput" placeholder="https://xyzcompany.supabase.co">
+        </div>
+        <div class="form-group">
+          <label>Chave Anon (public key)</label>
+          <input type="text" id="supabaseKeyInput" placeholder="eyJhbGciOiJKV1QiLC...">
+        </div>
+        <div class="form-group">
+          <label>Senha de Acesso ao Painel Admin</label>
+          <input type="text" id="adminPassInput" placeholder="ladies2026">
+        </div>
+
+        <p style="font-size:12px;color:#666">Crie a tabela no Supabase SQL Editor usando:</p>
+        <code>create table rsvps (id uuid default gen_random_uuid() primary key, created_at timestamp with time zone default timezone('utc'::text, now()), name text, phone text, attending boolean, message text);</code>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+          <button style="background:#888" onclick="closeConfigModal()">Cancelar</button>
+          <button style="background:var(--purple)" onclick="saveConfigModal()">Salvar Configurações</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Elements
+    const envelopeWrap = document.getElementById('envelopeWrap');
+    const envelope = document.getElementById('envelope');
+    const letter = document.getElementById('letter');
+    const backBtn = document.getElementById('backBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const rsvpForm = document.getElementById('rsvpForm');
+    const adminLink = document.getElementById('adminLink');
+
+    // Supabase & Storage Config
+    let SUPABASE_URL = localStorage.getItem('TL_SUPABASE_URL') || 'https://tympywecbvdzrzjsumoq.supabase.co';
+    let SUPABASE_KEY = localStorage.getItem('TL_SUPABASE_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5bXB5d2VjYnZkenJ6anN1bW9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MTU0NjIsImV4cCI6MjEwNTE5MTQ2Mn0.oycSy6HsM0wf_Q7WYfPxNJk7K41zNvlzHvDN7ssqwW4';
+    let ADMIN_PASS = localStorage.getItem('TL_ADMIN_PASS') || 'ladies2026';
+
+    let supabaseClient = null;
+    function initSupabase() {
+      if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_KEY) {
+        try {
+          supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (e) {
+          console.error("Erro ao iniciar Supabase:", e);
+        }
+      }
+    }
+    initSupabase();
+
+    // Opening Envelope
+    function openEnvelope() {
+      if (envelopeWrap.classList.contains('open')) return;
+      envelopeWrap.classList.add('open');
+      setTimeout(() => {
+        envelopeWrap.style.display = 'none';
+        letter.classList.add('show');
+      }, 850);
+    }
+
+    envelope.addEventListener('click', openEnvelope);
+    envelope.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openEnvelope();
+      }
+    });
+
+    backBtn.addEventListener('click', () => {
+      letter.classList.remove('show');
+      envelopeWrap.style.display = 'block';
+      setTimeout(() => envelopeWrap.classList.remove('open'), 30);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // RSVP Form Submission
+    rsvpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitRsvpBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
+
+      const name = document.getElementById('guestName').value.trim();
+      const phone = document.getElementById('guestPhone').value.trim();
+      const attending = document.querySelector('input[name="attending"]:checked').value === 'true';
+      const message = document.getElementById('guestMessage').value.trim();
+      const createdAt = new Date().toISOString();
+
+      const rsvpData = { name, phone, attending, message, created_at: createdAt };
+
+      // 1. Tenta salvar via Supabase se configurado
+      let savedCloud = false;
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('rsvps').insert([rsvpData]);
+          if (!error) savedCloud = true;
+        } catch (err) {
+          console.warn("Supabase offline ou erro:", err);
+        }
+      }
+
+      // 2. Sempre salva localmente no localStorage como garantia
+      let localList = JSON.parse(localStorage.getItem('TL_RSVPS') || '[]');
+      localList.push({ ...rsvpData, id: Date.now().toString() });
+      localStorage.setItem('TL_RSVPS', JSON.stringify(localList));
+
+      // Exibe sucesso
+      document.getElementById('rsvpForm').style.display = 'none';
+      const successDiv = document.getElementById('rsvpSuccess');
+      successDiv.style.display = 'block';
+
+      if (attending) {
+        document.getElementById('successTitle').textContent = 'Presença Confirmada! ✨';
+        document.getElementById('successMessage').textContent = `Querida ${name}, sua presença foi reservada com carinho! Nos vemos no dia 17 de outubro.`;
+      } else {
+        document.getElementById('successTitle').textContent = 'Resposta Registrada 💜';
+        document.getElementById('successMessage').textContent = `Obrigada por nos avisar, ${name}. Sentiremos sua falta nessa edição!`;
+      }
+    });
+
+    // Audio Engine Web Audio API
+    let audioCtx, master, timer, playing = false;
+    const notes = [261.63, 329.63, 392.00, 493.88, 392.00, 329.63];
+
+    function tone(freq, start, duration, volume = .018) {
+      if (!audioCtx || audioCtx.state === 'closed') return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const safeStart = Math.max(start, audioCtx.currentTime + 0.01);
+        gain.gain.setValueAtTime(0.0001, safeStart);
+        gain.gain.exponentialRampToValueAtTime(volume, safeStart + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, safeStart + duration);
+        osc.connect(gain).connect(master);
+        osc.start(safeStart);
+        osc.stop(safeStart + duration + .05);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function startMusic() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        master = audioCtx.createGain();
+        master.gain.value = .65;
+        master.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+
+      if (!timer) {
+        let i = 0;
+        timer = setInterval(() => {
+          if (!playing || !audioCtx) return;
+          const now = audioCtx.currentTime;
+          tone(notes[i % notes.length], now + 0.05, 2.8, .014);
+          tone(notes[(i + 2) % notes.length] / 2, now + 0.05, 3.4, .008);
+          i++;
+        }, 1700);
+      }
+      playing = true;
+      musicBtn.textContent = '♫ Pausar música';
+      musicBtn.classList.add('playing');
+    }
+
+    function pauseMusic() {
+      playing = false;
+      if (audioCtx && audioCtx.state === 'running') { audioCtx.suspend(); }
+      musicBtn.textContent = '♫ Ativar música';
+      musicBtn.classList.remove('playing');
+    }
+
+    musicBtn.addEventListener('click', () => {
+      if (playing) pauseMusic(); else startMusic();
+    });
+
+    // Roteamento SPA Admin
+    function handleRouting() {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      if (path.includes('/admin') || hash === '#admin' || search.includes('admin=1')) {
+        // Solicita senha de admin se necessário
+        const pass = prompt('Digite a senha de administrador:');
+        if (pass !== ADMIN_PASS) {
+          alert('Senha incorreta.');
+          window.location.hash = '';
+          return;
+        }
+        envelopeWrap.style.display = 'none';
+        letter.style.display = 'none';
+        document.getElementById('adminView').classList.add('show');
+        renderAdminDashboard();
+      } else {
+        document.getElementById('adminView').classList.remove('show');
+      }
+    }
+
+    window.addEventListener('hashchange', handleRouting);
+    document.addEventListener('DOMContentLoaded', handleRouting);
+
+    function navigateHome() {
+      window.location.hash = '';
+      document.getElementById('adminView').classList.remove('show');
+      envelopeWrap.style.display = 'block';
+    }
+
+    // Dashboard Data & Table Rendering
+    let currentRsvps = [];
+
+    async function fetchRsvps() {
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('rsvps').select('*').order('created_at', { ascending: false });
+          if (!error && data) return data;
+        } catch (e) { }
+      }
+      return JSON.parse(localStorage.getItem('TL_RSVPS') || '[]');
+    }
+
+    async function renderAdminDashboard() {
+      currentRsvps = await fetchRsvps();
+
+      const total = currentRsvps.length;
+      const yes = currentRsvps.filter(r => r.attending).length;
+      const no = total - yes;
+
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiYes').textContent = yes;
+      document.getElementById('kpiNo').textContent = no;
+
+      filterAdminTable();
+    }
+
+    function filterAdminTable() {
+      const q = (document.getElementById('adminSearch').value || '').toLowerCase();
+      const tbody = document.getElementById('adminTableBody');
+      tbody.innerHTML = '';
+
+      const filtered = currentRsvps.filter(r => (r.name || '').toLowerCase().includes(q) || (r.phone || '').includes(q));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#999;padding:24px">Nenhuma resposta encontrada.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '-';
+        const badge = r.attending
+          ? `<span class="badge-status yes">✨ Sim, Confirmado</span>`
+          : `<span class="badge-status no">💜 Ausente</span>`;
+
+        tr.innerHTML = `
+          <td><strong>${r.name}</strong></td>
+          <td>${r.phone || '-'}</td>
+          <td>${badge}</td>
+          <td>${r.message || '-'}</td>
+          <td>${dt}</td>
+          <td><button class="btn-del" onclick="deleteRsvp('${r.id}')" title="Excluir">🗑️</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteRsvp(id) {
+      if (!confirm('Deseja realmente remover esta resposta?')) return;
+      if (supabaseClient) {
+        try { await supabaseClient.from('rsvps').delete().eq('id', id); } catch (e) { }
+      }
+      let localList = JSON.parse(localStorage.getItem('TL_RSVPS') || '[]');
+      localList = localList.filter(item => item.id !== id);
+      localStorage.setItem('TL_RSVPS', JSON.stringify(localList));
+      renderAdminDashboard();
+    }
+
+    function promptAddGuest() {
+      const name = prompt('Nome da Convidada:');
+      if (!name) return;
+      const phone = prompt('WhatsApp / Telefone:') || '';
+      const isYes = confirm('Ela confirmou presença?\nOK = Sim, Cancelar = Não');
+
+      const newEntry = {
+        id: Date.now().toString(),
+        name, phone, attending: isYes, message: 'Adicionado manualmente', created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        supabaseClient.from('rsvps').insert([newEntry]);
+      }
+      let localList = JSON.parse(localStorage.getItem('TL_RSVPS') || '[]');
+      localList.push(newEntry);
+      localStorage.setItem('TL_RSVPS', JSON.stringify(localList));
+      renderAdminDashboard();
+    }
+
+    function exportToCSV() {
+      if (currentRsvps.length === 0) { alert('Nenhuma resposta para exportar.'); return; }
+      let csv = '\uFEFFNome,Telefone,Status,Mensagem,Data\n';
+      currentRsvps.forEach(r => {
+        const status = r.attending ? 'Confirmado' : 'Ausente';
+        csv += `"${r.name}","${r.phone}","${status}","${(r.message || '').replace(/"/g, '""')}","${r.created_at || ''}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Confirmacoes_Tem_Ladies_Experience.csv';
+      a.click();
+    }
+
+    // Modal Config
+    function openConfigModal() {
+      document.getElementById('supabaseUrlInput').value = SUPABASE_URL;
+      document.getElementById('supabaseKeyInput').value = SUPABASE_KEY;
+      document.getElementById('supabaseKeyInput').value = SUPABASE_KEY;
+      document.getElementById('adminPassInput').value = ADMIN_PASS;
+      document.getElementById('configModal').classList.add('show');
+    }
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.remove('show');
+    }
+    function saveConfigModal() {
+      SUPABASE_URL = document.getElementById('supabaseUrlInput').value.trim();
+      SUPABASE_KEY = document.getElementById('supabaseKeyInput').value.trim();
+      ADMIN_PASS = document.getElementById('adminPassInput').value.trim() || 'ladies2026';
+
+      localStorage.setItem('TL_SUPABASE_URL', SUPABASE_URL);
+      localStorage.setItem('TL_SUPABASE_KEY', SUPABASE_KEY);
+      localStorage.setItem('TL_ADMIN_PASS', ADMIN_PASS);
+
+      initSupabase();
+      closeConfigModal();
+      alert('Configurações salvas!');
+      renderAdminDashboard();
+    }
+  </script>
+</body>
+
+</html>
