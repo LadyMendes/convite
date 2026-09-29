@@ -586,10 +586,6 @@
         <button id="musicBtn">♫ Ativar música</button>
         <button class="secondary" id="backBtn">↩ Voltar ao envelope</button>
       </div>
-
-      <div class="footer-admin-link">
-        <a id="adminLink" href="#admin">🔒 Painel Administrativo</a>
-      </div>
     </article>
 
     <!-- Painel de Administração (/admin) -->
@@ -836,12 +832,16 @@
       const hash = window.location.hash;
       const search = window.location.search;
 
-      if (path.includes('/admin') || hash === '#admin' || search.includes('admin=1')) {
-        // Solicita senha de admin se necessário
-        const pass = prompt('Digite a senha de administrador:');
+      if (path.includes('/admin') || hash === '#admin' || search.includes('admin')) {
+        const pass = prompt('🔒 Acesso Restrito: Digite a senha de administrador:');
         if (pass !== ADMIN_PASS) {
-          alert('Senha incorreta.');
-          window.location.hash = '';
+          if (pass !== null) alert('Senha incorreta.');
+          if (window.location.hash === '#admin') window.location.hash = '';
+          if (window.location.pathname.includes('/admin')) {
+            history.replaceState(null, '', window.location.pathname.replace(/\/admin\/?$/, '/'));
+          }
+          document.getElementById('adminView').classList.remove('show');
+          envelopeWrap.style.display = 'block';
           return;
         }
         envelopeWrap.style.display = 'none';
@@ -857,9 +857,13 @@
     document.addEventListener('DOMContentLoaded', handleRouting);
 
     function navigateHome() {
-      window.location.hash = '';
+      if (window.location.hash === '#admin') window.location.hash = '';
+      if (window.location.pathname.includes('/admin')) {
+        history.replaceState(null, '', window.location.pathname.replace(/\/admin\/?$/, '/'));
+      }
       document.getElementById('adminView').classList.remove('show');
       envelopeWrap.style.display = 'block';
+      letter.style.display = 'none';
     }
 
     // Dashboard Data & Table Rendering
